@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satyanarayan Jadhav — Senior Software Engineer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ============================================
+           VARIABLES & RESET
+           ============================================ */
+        :root {
+            --siemens-teal: #009999;
+            --siemens-dark-teal: #00646E;
+            --siemens-petrol: #005159;
+            --siemens-light-teal: #00CCCC;
+            --siemens-accent: #00FFD1;
+            --siemens-bg-dark: #0A1628;
+            --siemens-bg-medium: #0F1F3A;
+            --siemens-bg-light: #142847;
+            --siemens-text: #E8F4F8;
+            --siemens-text-dim: #8BA4B8;
+            --siemens-glow: rgba(0, 153, 153, 0.4);
+            --siemens-glow-strong: rgba(0, 153, 153, 0.7);
+            --bus-gold: #FFD700;
+            --bus-orange: #FF8C00;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--siemens-teal) var(--siemens-bg-dark);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--siemens-bg-dark);
+            color: var(--siemens-text);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--siemens-bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--siemens-teal); border-radius: 3px; }
+
+        /* ============================================
+           ANIMATED BACKGROUND
+           ============================================ */
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-pattern::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(0,153,153,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,100,110,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0,81,89,0.08) 0%, transparent 70%);
+            animation: bgPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(0,153,153,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,153,153,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--siemens-teal);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-100px) scale(1); }
+        }
+
+        /* ============================================
+           BUS ROUTE TRACK (LEFT SIDE)
+           ============================================ */
+        .bus-route {
+            position: fixed;
+            left: 10px;
+            top: 0;
+            height: 100%;
+            width: 120px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .route-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .route-path-bg {
+            fill: none;
+            stroke: rgba(0,153,153,0.15);
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        .route-path-progress {
+            fill: none;
+            stroke: url(#routeGradient);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: var(--path-length);
+            stroke-dashoffset: var(--path-length);
+            filter: drop-shadow(0 0 6px var(--siemens-glow));
+        }
+
+        .route-path-dashes {
+            fill: none;
+            stroke: rgba(255,255,255,0.06);
+            stroke-width: 2;
+            stroke-dasharray: 8 14;
+            stroke-linecap: round;
+        }
+
+        /* Bus Vehicle */
+        .bus-vehicle {
+            position: fixed;
+            left: 10px;
+            top: 80px;
+            z-index: 101;
+            transition: none;
+            filter: drop-shadow(0 0 15px var(--siemens-glow-strong));
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .bus-svg {
+            width: 44px;
+            height: 70px;
+        }
+
+        /* Bus stops */
+        .bus-stop {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--siemens-bg-dark);
+            border: 3px solid rgba(0,153,153,0.4);
+            transition: all 0.5s ease;
+            z-index: 2;
+            transform: translate(-50%, -50%);
+        }
+
+        .bus-stop.visited {
+            background: var(--siemens-accent);
+            border-color: var(--siemens-accent);
+            box-shadow: 0 0 20px var(--siemens-glow-strong);
+        }
+
+        .bus-stop-label {
+            position: absolute;
+            left: 26px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--siemens-text-dim);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            opacity: 0.6;
+            transition: all 0.5s;
+        }
+
+        .bus-stop.visited .bus-stop-label {
+            color: var(--siemens-accent);
+            opacity: 1;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            margin-left: 220px;
+            max-width: 1100px;
+            padding: 0 2rem;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 6rem 0;
+        }
+
+        .section-inner {
+            width: 100%;
+            opacity: 0;
+            transform: translateY(60px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section-inner.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        #hero {
+            min-height: 100vh;
+            padding-top: 40px;
+        }
+
+        #hero .section-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 3rem;
+        }
+
+        .hero-text {
+            flex: 1;
+        }
+
+        .hero-image {
+            flex-shrink: 0;
+            position: relative;
+            margin-top: 60px;
+        }
+
+        .hero-image img {
+            width: 280px;
+            height: 280px;
+            border-radius: 24px;
+            object-fit: cover;
+            border: 3px solid rgba(0,153,153,0.3);
+            box-shadow: 0 20px 60px rgba(0,153,153,0.2);
+            transition: all 0.4s ease;
+        }
+
+        .hero-image img:hover {
+            border-color: var(--siemens-accent);
+            box-shadow: 0 24px 70px rgba(0,153,153,0.35);
+            transform: translateY(-4px);
+        }
+
+        .hero-image::before {
+            content: '';
+            position: absolute;
+            top: -8px; left: -8px;
+            right: -8px; bottom: -8px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, var(--siemens-teal), transparent, var(--siemens-accent));
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(0,153,153,0.1);
+            border: 1px solid rgba(0,153,153,0.25);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--siemens-accent);
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-badge .dot {
+            width: 8px; height: 8px;
+            background: var(--siemens-accent);
+            border-radius: 50%;
+            animation: dotPulse 2s infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-title .first-name {
+            display: block;
+            background: linear-gradient(135deg, #fff, var(--siemens-text));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-title .last-name {
+            display: block;
+            background: linear-gradient(135deg, var(--siemens-teal), var(--siemens-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-role {
+            font-size: 1.3rem;
+            color: var(--siemens-text-dim);
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        .hero-role .typing-text {
+            border-right: 2px solid var(--siemens-accent);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { border-color: var(--siemens-accent); }
+            50% { border-color: transparent; }
+        }
+
+        .hero-desc {
+            font-size: 1.05rem;
+            color: var(--siemens-text-dim);
+            max-width: 600px;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--siemens-teal), var(--siemens-dark-teal));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before { left: 100%; }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,153,153,0.4);
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--siemens-accent);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            border: 2px solid rgba(0,153,153,0.4);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--siemens-accent);
+            background: rgba(0,153,153,0.1);
+            transform: translateY(-2px);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0,153,153,0.15);
+        }
+
+        .stat { text-align: left; }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--siemens-light-teal), var(--siemens-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--siemens-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        /* ============================================
+           SECTION HEADERS
+           ============================================ */
+        .section-header {
+            margin-bottom: 3rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--siemens-accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 0.75rem;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .section-tag::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 28px;
+            height: 2px;
+            background: var(--siemens-accent);
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
+
+        .section-title .highlight {
+            background: linear-gradient(135deg, var(--siemens-teal), var(--siemens-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ============================================
+           ABOUT SECTION
+           ============================================ */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .about-text p {
+            color: var(--siemens-text-dim);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .info-card {
+            padding: 1.2rem;
+            background: rgba(0,153,153,0.05);
+            border: 1px solid rgba(0,153,153,0.12);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            border-color: rgba(0,153,153,0.3);
+            background: rgba(0,153,153,0.08);
+            transform: translateY(-2px);
+        }
+
+        .info-card-icon {
+            font-size: 1.3rem;
+            color: var(--siemens-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card-label {
+            font-size: 0.7rem;
+            color: var(--siemens-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-card-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--siemens-text);
+        }
+
+        /* ============================================
+           SKILLS SECTION
+           ============================================ */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .skill-category {
+            padding: 2rem;
+            background: rgba(0,153,153,0.04);
+            border: 1px solid rgba(0,153,153,0.1);
+            border-radius: 16px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-category::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--siemens-teal), var(--siemens-accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .skill-category:hover::before { opacity: 1; }
+
+        .skill-category:hover {
+            border-color: rgba(0,153,153,0.3);
+            background: rgba(0,153,153,0.08);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,153,153,0.1);
+        }
+
+        .skill-cat-icon {
+            width: 48px; height: 48px;
+            background: rgba(0,153,153,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--siemens-accent);
+            margin-bottom: 1rem;
+        }
+
+        .skill-cat-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--siemens-text);
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            padding: 5px 12px;
+            background: rgba(0,153,153,0.08);
+            border: 1px solid rgba(0,153,153,0.15);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            color: var(--siemens-text-dim);
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .skill-tag:hover {
+            background: rgba(0,153,153,0.15);
+            color: var(--siemens-accent);
+            border-color: rgba(0,153,153,0.4);
+        }
+
+        /* ============================================
+           EXPERIENCE SECTION
+           ============================================ */
+        .experience-card {
+            padding: 2.5rem;
+            background: rgba(0,153,153,0.04);
+            border: 1px solid rgba(0,153,153,0.1);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .experience-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: linear-gradient(180deg, var(--siemens-accent), var(--siemens-teal));
+        }
+
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .exp-company-logo {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, var(--siemens-teal), var(--siemens-dark-teal));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .exp-role {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .exp-company {
+            font-size: 1.1rem;
+            color: var(--siemens-accent);
+            font-weight: 500;
+        }
+
+        .exp-meta {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--siemens-text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .exp-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .exp-achievements {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .achievement {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 1rem;
+            background: rgba(0,153,153,0.04);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .achievement:hover {
+            background: rgba(0,153,153,0.08);
+        }
+
+        .achievement-icon {
+            width: 28px; height: 28px;
+            background: rgba(0,153,153,0.12);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--siemens-accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .achievement p {
+            color: var(--siemens-text-dim);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .achievement strong {
+            color: var(--siemens-text);
+        }
+
+        /* ============================================
+           EDUCATION SECTION
+           ============================================ */
+        .education-card {
+            padding: 2.5rem;
+            background: rgba(0,153,153,0.04);
+            border: 1px solid rgba(0,153,153,0.1);
+            border-radius: 20px;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .edu-icon-wrap {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, rgba(0,153,153,0.15), rgba(0,153,153,0.05));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--siemens-accent);
+            flex-shrink: 0;
+        }
+
+        .edu-content h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .edu-content .edu-school {
+            color: var(--siemens-accent);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .edu-content .edu-details {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--siemens-text-dim);
+            font-size: 0.85rem;
+        }
+
+        .edu-details span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cgpa-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(0,255,209,0.1);
+            border: 1px solid rgba(0,255,209,0.25);
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--siemens-accent);
+            margin-top: 0.75rem;
+        }
+
+        /* ============================================
+           ACHIEVEMENTS SECTION
+           ============================================ */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .award-card {
+            padding: 2rem;
+            background: rgba(0,153,153,0.04);
+            border: 1px solid rgba(0,153,153,0.1);
+            border-radius: 16px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .award-card::after {
+            content: '';
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(0,255,209,0.06), transparent 70%);
+            transition: all 0.4s;
+        }
+
+        .award-card:hover {
+            border-color: rgba(0,153,153,0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,153,153,0.1);
+        }
+
+        .award-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,140,0,0.1));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .award-year {
+            font-size: 0.75rem;
+            color: var(--siemens-accent);
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .award-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .award-desc {
+            font-size: 0.85rem;
+            color: var(--siemens-text-dim);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           CONTACT SECTION
+           ============================================ */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .contact-info-card {
+            padding: 2.5rem;
+            background: rgba(0,153,153,0.04);
+            border: 1px solid rgba(0,153,153,0.1);
+            border-radius: 20px;
+        }
+
+        .contact-info-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info-card p {
+            color: var(--siemens-text-dim);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0,153,153,0.08);
+            text-decoration: none;
+            color: var(--siemens-text);
+            transition: all 0.3s;
+        }
+
+        .contact-item:last-child { border-bottom: none; }
+
+        .contact-item:hover {
+            color: var(--siemens-accent);
+            padding-left: 8px;
+        }
+
+        .contact-item-icon {
+            width: 44px; height: 44px;
+            background: rgba(0,153,153,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--siemens-accent);
+            flex-shrink: 0;
+        }
+
+        .contact-item-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .contact-form-card {
+            padding: 2.5rem;
+            background: rgba(0,153,153,0.04);
+            border: 1px solid rgba(0,153,153,0.1);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .contact-cta-icon {
+            font-size: 3rem;
+            color: var(--siemens-accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-form-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .contact-form-card p {
+            color: var(--siemens-text-dim);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            width: 50px; height: 50px;
+            background: rgba(0,153,153,0.08);
+            border: 1px solid rgba(0,153,153,0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--siemens-text-dim);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            background: var(--siemens-teal);
+            color: white;
+            border-color: var(--siemens-teal);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,153,153,0.3);
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            position: relative;
+            z-index: 1;
+            margin-left: 220px;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(0,153,153,0.1);
+            text-align: center;
+        }
+
+        .footer p {
+            color: var(--siemens-text-dim);
+            font-size: 0.85rem;
+        }
+
+        .footer .heart {
+            color: var(--siemens-accent);
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        .stagger-1 { transition-delay: 0.1s; }
+        .stagger-2 { transition-delay: 0.2s; }
+        .stagger-3 { transition-delay: 0.3s; }
+        .stagger-4 { transition-delay: 0.4s; }
+        .stagger-5 { transition-delay: 0.5s; }
+        .stagger-6 { transition-delay: 0.6s; }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 150px;
+                padding: 0 1.5rem;
+            }
+            .footer { margin-left: 150px; }
+            .bus-route { left: 5px; width: 110px; }
+            .bus-vehicle { left: 5px; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 0 1.5rem;
+            }
+            .footer { margin-left: 0; }
+            .bus-route { display: none; }
+            .bus-vehicle { display: none; }
+
+            .hero-stats { gap: 1.5rem; }
+            .about-grid { grid-template-columns: 1fr; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .exp-achievements { grid-template-columns: 1fr; }
+            .achievements-grid { grid-template-columns: 1fr; }
+            .contact-grid { grid-template-columns: 1fr; }
+
+            .education-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            #hero .section-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-image img {
+                width: 200px;
+                height: 200px;
+            }
+
+            section { min-height: auto; padding: 4rem 0; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { letter-spacing: -1.5px; }
+            .hero-stats { flex-direction: column; gap: 1rem; }
+            .info-cards { grid-template-columns: 1fr; }
+        }
+
+        /* ============================================
+           DOWNLOAD RESUME FLOATING BTN
+           ============================================ */
+        .download-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--siemens-teal), var(--siemens-dark-teal));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            text-decoration: none;
+            box-shadow: 0 8px 30px rgba(0,153,153,0.4);
+            transition: all 0.3s;
+        }
+
+        .download-fab:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0,153,153,0.5);
+        }
+
+        /* ============================================
+           ROAD MARKS (decorative dashes on route line)
+           ============================================ */
+    </style>
+</head>
+<body>
+
+    <!-- Background Effects -->
+    <div class="bg-pattern"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Bus Route Track -->
+    <div class="bus-route" id="busRoute">
+        <svg class="route-svg" preserveAspectRatio="none" viewBox="0 0 100 1000">
+            <defs>
+                <linearGradient id="routeGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#00FFD1"/>
+                    <stop offset="100%" stop-color="#009999"/>
+                </linearGradient>
+            </defs>
+            <path id="routePathBg" class="route-path-bg"
+                  d="M30,20 C95,250 95,750 30,980"/>
+            <path id="routePathDashes" class="route-path-dashes"
+                  d="M30,20 C95,250 95,750 30,980"/>
+            <path id="routePathProgress" class="route-path-progress"
+                  d="M30,20 C95,250 95,750 30,980"/>
+        </svg>
+
+        <div class="bus-stop" data-stop="0.08">
+            <span class="bus-stop-label">Home</span>
+        </div>
+        <div class="bus-stop" data-stop="0.22">
+            <span class="bus-stop-label">About</span>
+        </div>
+        <div class="bus-stop" data-stop="0.36">
+            <span class="bus-stop-label">Skills</span>
+        </div>
+        <div class="bus-stop" data-stop="0.52">
+            <span class="bus-stop-label">Experience</span>
+        </div>
+        <div class="bus-stop" data-stop="0.66">
+            <span class="bus-stop-label">Education</span>
+        </div>
+        <div class="bus-stop" data-stop="0.78">
+            <span class="bus-stop-label">Awards</span>
+        </div>
+        <div class="bus-stop" data-stop="0.92">
+            <span class="bus-stop-label">Contact</span>
+        </div>
+    </div>
+
+    <!-- Bus Vehicle -->
+    <div class="bus-vehicle" id="busVehicle">
+        <svg class="bus-svg" viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Bus body -->
+            <rect x="4" y="8" width="36" height="52" rx="8" fill="#009999"/>
+            <rect x="4" y="8" width="36" height="52" rx="8" stroke="#00CCCC" stroke-width="1.5"/>
+            <!-- Windshield -->
+            <rect x="8" y="12" width="28" height="14" rx="4" fill="#0A1628" opacity="0.8"/>
+            <rect x="8" y="12" width="28" height="14" rx="4" stroke="#00FFD1" stroke-width="0.8"/>
+            <!-- Windows row 1 -->
+            <rect x="9" y="30" width="10" height="8" rx="2" fill="#0A1628" opacity="0.7"/>
+            <rect x="9" y="30" width="10" height="8" rx="2" stroke="#00CCCC" stroke-width="0.5"/>
+            <rect x="25" y="30" width="10" height="8" rx="2" fill="#0A1628" opacity="0.7"/>
+            <rect x="25" y="30" width="10" height="8" rx="2" stroke="#00CCCC" stroke-width="0.5"/>
+            <!-- Windows row 2 -->
+            <rect x="9" y="42" width="10" height="8" rx="2" fill="#0A1628" opacity="0.7"/>
+            <rect x="9" y="42" width="10" height="8" rx="2" stroke="#00CCCC" stroke-width="0.5"/>
+            <rect x="25" y="42" width="10" height="8" rx="2" fill="#0A1628" opacity="0.7"/>
+            <rect x="25" y="42" width="10" height="8" rx="2" stroke="#00CCCC" stroke-width="0.5"/>
+            <!-- Headlights -->
+            <circle cx="12" cy="10" r="3" fill="#FFD700" opacity="0.9"/>
+            <circle cx="32" cy="10" r="3" fill="#FFD700" opacity="0.9"/>
+            <!-- Headlight glow -->
+            <circle cx="12" cy="10" r="5" fill="#FFD700" opacity="0.2"/>
+            <circle cx="32" cy="10" r="5" fill="#FFD700" opacity="0.2"/>
+            <!-- Taillights -->
+            <circle cx="12" cy="58" r="2.5" fill="#FF4444" opacity="0.8"/>
+            <circle cx="32" cy="58" r="2.5" fill="#FF4444" opacity="0.8"/>
+            <!-- Wheels -->
+            <rect x="2" y="55" width="8" height="10" rx="4" fill="#1a1a2e"/>
+            <rect x="34" y="55" width="8" height="10" rx="4" fill="#1a1a2e"/>
+            <rect x="2" y="5" width="8" height="10" rx="4" fill="#1a1a2e"/>
+            <rect x="34" y="5" width="8" height="10" rx="4" fill="#1a1a2e"/>
+            <!-- Siemens text on bus -->
+            <text x="22" y="27" text-anchor="middle" fill="#00FFD1" font-size="5" font-weight="bold" font-family="Inter, sans-serif">SJ</text>
+        </svg>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- ==================== HERO ==================== -->
+        <section id="hero">
+            <div class="section-inner">
+                <div class="hero-text">
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    Available for opportunities
+                </div>
+                <h1 class="hero-title">
+                    <span class="first-name">Satyanarayan</span>
+                    <span class="last-name">Jadhav</span>
+                </h1>
+                <p class="hero-role">
+                    <span class="typing-text" id="typingText"></span>
+                </p>
+                <p class="hero-desc">
+                    Backend Developer with 4+ years of experience building scalable Golang-based 
+                    microservices and edge applications. Passionate about distributed systems, 
+                    high-performance APIs, and clean architecture.
+                </p>
+                <div class="hero-actions">
+                    <a href="#contact" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i> Get in Touch
+                    </a>
+                    <a href="Satya-SDE2-Resume.pdf" download class="btn-outline">
+                        <i class="fas fa-download"></i> Download Resume
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-value" data-count="4">0</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" data-count="50">0</div>
+                        <div class="stat-label">% Modularity Gain</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" data-count="90">0</div>
+                        <div class="stat-label">% Test Speed Up</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" data-count="60">0</div>
+                        <div class="stat-label">% Latency Reduced</div>
+                    </div>
+                </div>
+                </div>
+                <div class="hero-image">
+                    <img src="Screenshot%20from%202026-03-29%2023-05-54.png" alt="Satyanarayan Jadhav">
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ABOUT ==================== -->
+        <section id="about">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-tag">About Me</span>
+                    <h2 class="section-title">Building the <span class="highlight">Future</span> of<br>Edge Computing</h2>
+                </div>
+                <div class="about-grid">
+                    <div class="about-text">
+                        <p>
+                            I'm a Senior Software Engineer at <strong>Siemens</strong>, based in Pune, India. 
+                            I specialize in building high-performance backend systems using <strong>Golang</strong>, 
+                            designing microservice architectures, and developing edge computing applications.
+                        </p>
+                        <p>
+                            My work involves engineering RESTful APIs for Linux-based edge devices, implementing 
+                            event-driven architectures, and enabling real-time communication using gRPC and WebSockets. 
+                            I'm passionate about writing clean, tested, and maintainable code that makes a real impact.
+                        </p>
+                        <p>
+                            When I'm not coding, I explore system design concepts, contribute to improving development 
+                            workflows, and stay updated with the latest in distributed systems and cloud-native technologies.
+                        </p>
+                    </div>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <div class="info-card-label">Location</div>
+                            <div class="info-card-value">Pune, India</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="fas fa-building"></i></div>
+                            <div class="info-card-label">Company</div>
+                            <div class="info-card-value">Siemens</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="fas fa-code"></i></div>
+                            <div class="info-card-label">Primary Language</div>
+                            <div class="info-card-value">Golang</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="fas fa-graduation-cap"></i></div>
+                            <div class="info-card-label">Education</div>
+                            <div class="info-card-value">B.Tech CS</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SKILLS ==================== -->
+        <section id="skills">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-tag">Skills &amp; Expertise</span>
+                    <h2 class="section-title">My <span class="highlight">Technical</span> Arsenal</h2>
+                </div>
+                <div class="skills-grid">
+                    <div class="skill-category stagger-1">
+                        <div class="skill-cat-icon"><i class="fas fa-code"></i></div>
+                        <h3 class="skill-cat-title">Programming</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Golang</span>
+                            <span class="skill-tag">TypeScript</span>
+                            <span class="skill-tag">Angular</span>
+                        </div>
+                    </div>
+                    <div class="skill-category stagger-2">
+                        <div class="skill-cat-icon"><i class="fas fa-server"></i></div>
+                        <h3 class="skill-cat-title">Technologies</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">REST APIs</span>
+                            <span class="skill-tag">gRPC</span>
+                            <span class="skill-tag">WebSockets</span>
+                            <span class="skill-tag">Microservices</span>
+                            <span class="skill-tag">Prometheus</span>
+                            <span class="skill-tag">Grafana</span>
+                        </div>
+                    </div>
+                    <div class="skill-category stagger-3">
+                        <div class="skill-cat-icon"><i class="fas fa-network-wired"></i></div>
+                        <h3 class="skill-cat-title">Protocols</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">BACnet</span>
+                            <span class="skill-tag">Modbus</span>
+                            <span class="skill-tag">Apogee P2</span>
+                            <span class="skill-tag">SFTP</span>
+                        </div>
+                    </div>
+                    <div class="skill-category stagger-4">
+                        <div class="skill-cat-icon"><i class="fab fa-docker"></i></div>
+                        <h3 class="skill-cat-title">DevOps</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">CI/CD</span>
+                            <span class="skill-tag">Linux</span>
+                            <span class="skill-tag">GitLab</span>
+                        </div>
+                    </div>
+                    <div class="skill-category stagger-5">
+                        <div class="skill-cat-icon"><i class="fas fa-vial"></i></div>
+                        <h3 class="skill-cat-title">Testing</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Cypress</span>
+                            <span class="skill-tag">Integration Testing</span>
+                            <span class="skill-tag">E2E Testing</span>
+                        </div>
+                    </div>
+                    <div class="skill-category stagger-6">
+                        <div class="skill-cat-icon"><i class="fas fa-brain"></i></div>
+                        <h3 class="skill-cat-title">Concepts</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Data Structures</span>
+                            <span class="skill-tag">SOLID</span>
+                            <span class="skill-tag">System Design</span>
+                            <span class="skill-tag">Edge Computing</span>
+                            <span class="skill-tag">Networking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== EXPERIENCE ==================== -->
+        <section id="experience">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-tag">Experience</span>
+                    <h2 class="section-title">Where I've <span class="highlight">Made Impact</span></h2>
+                </div>
+                <div class="experience-card">
+                    <div class="exp-header">
+                        <div>
+                            <div class="exp-company-logo">S</div>
+                            <h3 class="exp-role">Senior Software Engineer</h3>
+                            <p class="exp-company">Siemens</p>
+                        </div>
+                    </div>
+                    <div class="exp-meta">
+                        <span><i class="fas fa-calendar-alt"></i> July 2022 – Present</span>
+                        <span><i class="fas fa-map-marker-alt"></i> Pune, India</span>
+                    </div>
+                    <div class="exp-achievements">
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fas fa-bolt"></i></div>
+                            <p>Engineered <strong>high-performance RESTful APIs</strong> in Golang for Linux-based edge devices, improving system performance and reliability.</p>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fas fa-cubes"></i></div>
+                            <p>Architected <strong>scalable microservices</strong>, improving modularity and maintainability by <strong>50%</strong>.</p>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fas fa-broadcast-tower"></i></div>
+                            <p>Introduced <strong>event-driven architecture</strong>, improving system scalability and async processing efficiency by <strong>40%</strong>.</p>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fas fa-satellite-dish"></i></div>
+                            <p>Enabled <strong>real-time communication</strong> using gRPC and WebSockets, reducing latency by <strong>60%</strong>.</p>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fas fa-plug"></i></div>
+                            <p>Built edge applications from scratch supporting <strong>BACnet, Modbus, Apogee P2, and SFTP</strong> protocols.</p>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fab fa-docker"></i></div>
+                            <p><strong>Containerized services</strong> using Docker and automated CI/CD pipelines, reducing deployment time by <strong>35%</strong>.</p>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fas fa-stopwatch"></i></div>
+                            <p>Developed integration testing framework, reducing execution time from hours to <strong>~6 minutes</strong> (90%+ improvement).</p>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon"><i class="fas fa-tools"></i></div>
+                            <p><strong>Refactored legacy code</strong> using Go interfaces and design patterns, reducing code complexity and technical debt.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== EDUCATION ==================== -->
+        <section id="education">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-tag">Education</span>
+                    <h2 class="section-title">Academic <span class="highlight">Foundation</span></h2>
+                </div>
+                <div class="education-card">
+                    <div class="edu-icon-wrap">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="edu-content">
+                        <h3>Bachelor of Technology in Computer Science</h3>
+                        <p class="edu-school">Shri Guru Gobind Singhji Institute of Engineering and Technology</p>
+                        <div class="edu-details">
+                            <span><i class="fas fa-map-marker-alt"></i> Nanded, Maharashtra</span>
+                            <span><i class="fas fa-calendar-alt"></i> 2018 – 2022</span>
+                        </div>
+                        <div class="cgpa-badge">
+                            <i class="fas fa-star"></i> 8.5 CGPA
+                        </div>
+                    </div>
+                </div>
+
+                <div class="education-card" style="margin-top: 1.5rem;">
+                    <div class="edu-icon-wrap">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div class="edu-content">
+                        <h3>Higher Secondary Education (12th)</h3>
+                        <p class="edu-school">Yeshwant Mahavidyalaya, Nanded</p>
+                        <div class="edu-details">
+                            <span><i class="fas fa-map-marker-alt"></i> Nanded, Maharashtra</span>
+                        </div>
+                        <div class="cgpa-badge">
+                            <i class="fas fa-star"></i> 92%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ACHIEVEMENTS ==================== -->
+        <section id="achievements">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-tag">Achievements</span>
+                    <h2 class="section-title">Recognition &amp; <span class="highlight">Awards</span></h2>
+                </div>
+                <div class="achievements-grid">
+                    <div class="award-card stagger-1">
+                        <div class="award-icon">🏆</div>
+                        <div class="award-year">2024</div>
+                        <h3 class="award-title">Siemens Champion Award</h3>
+                        <p class="award-desc">Awarded for outstanding performance and exceptional contributions to the team and product.</p>
+                    </div>
+                    <div class="award-card stagger-2">
+                        <div class="award-icon">💡</div>
+                        <div class="award-year">2023</div>
+                        <h3 class="award-title">Siemens Hackathon Winner</h3>
+                        <p class="award-desc">Won with the idea "Carbon Footprint of Gateway Device" — innovative sustainability solution.</p>
+                    </div>
+                    <div class="award-card stagger-3">
+                        <div class="award-icon">⭐</div>
+                        <div class="award-year">2022</div>
+                        <h3 class="award-title">Outstanding Performance Award</h3>
+                        <p class="award-desc">Recognized for exceptional performance as a fresher, demonstrating strong teamwork and innovation.</p>
+                    </div>
+                    <div class="award-card stagger-4">
+                        <div class="award-icon">🎓</div>
+                        <div class="award-year">2018 – 2022</div>
+                        <h3 class="award-title">Siemens Scholar</h3>
+                        <p class="award-desc">Felicitated under the prestigious Siemens Scholarship Program throughout college education.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== CONTACT ==================== -->
+        <section id="contact">
+            <div class="section-inner">
+                <div class="section-header">
+                    <span class="section-tag">Contact</span>
+                    <h2 class="section-title">Let's <span class="highlight">Connect</span></h2>
+                </div>
+                <div class="contact-grid">
+                    <div class="contact-info-card">
+                        <h3>Get in touch</h3>
+                        <p>I'm always open to discussing new opportunities, innovative projects, and tech collaborations.</p>
+                        <a href="mailto:satishjadhav8655@gmail.com" class="contact-item">
+                            <div class="contact-item-icon"><i class="fas fa-envelope"></i></div>
+                            <span class="contact-item-text">satishjadhav8655@gmail.com</span>
+                        </a>
+                        <a href="tel:+919665796948" class="contact-item">
+                            <div class="contact-item-icon"><i class="fas fa-phone"></i></div>
+                            <span class="contact-item-text">+91-9665796948</span>
+                        </a>
+                        <div class="contact-item">
+                            <div class="contact-item-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <span class="contact-item-text">Pune, India</span>
+                        </div>
+                    </div>
+                    <div class="contact-form-card">
+                        <div class="contact-cta-icon"><i class="fas fa-handshake"></i></div>
+                        <h3>Let's build something great</h3>
+                        <p>Connect with me on social platforms!</p>
+                        <div class="social-links">
+                            <a href="https://www.linkedin.com/in/satyanarayan-jadhav-01b97b18b/" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="https://github.com/satu08" class="social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Designed &amp; Built with <span class="heart">&hearts;</span> by Satyanarayan Jadhav &copy; 2026</p>
+    </footer>
+
+    <!-- Floating Download Button -->
+    <a href="Satya-SDE2-Resume.pdf" download class="download-fab" title="Download Resume">
+        <i class="fas fa-file-download"></i>
+    </a>
+
+    <script>
+        // ============================================
+        // PARTICLES
+        // ============================================
+        (function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (8 + Math.random() * 12) + 's';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.width = (2 + Math.random() * 4) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        })();
+
+        // ============================================
+        // TYPING EFFECT
+        // ============================================
+        (function typingEffect() {
+            const roles = [
+                'Senior Software Engineer',
+                'Backend Developer',
+                'Golang Enthusiast',
+                'Edge Computing Engineer',
+                'Microservices Architect'
+            ];
+            const el = document.getElementById('typingText');
+            let roleIdx = 0;
+            let charIdx = 0;
+            let isDeleting = false;
+            let speed = 80;
+
+            function type() {
+                const current = roles[roleIdx];
+                if (isDeleting) {
+                    el.textContent = current.substring(0, charIdx - 1);
+                    charIdx--;
+                    speed = 40;
+                } else {
+                    el.textContent = current.substring(0, charIdx + 1);
+                    charIdx++;
+                    speed = 80;
+                }
+
+                if (!isDeleting && charIdx === current.length) {
+                    speed = 2000;
+                    isDeleting = true;
+                } else if (isDeleting && charIdx === 0) {
+                    isDeleting = false;
+                    roleIdx = (roleIdx + 1) % roles.length;
+                    speed = 500;
+                }
+
+                setTimeout(type, speed);
+            }
+            type();
+        })();
+
+        // ============================================
+        // SECTION REVEAL ANIMATION
+        // ============================================
+        const sectionInners = document.querySelectorAll('.section-inner');
+        const observerReveal = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+        sectionInners.forEach(el => observerReveal.observe(el));
+
+        // ============================================
+        // COUNTER ANIMATION
+        // ============================================
+        const stats = document.querySelectorAll('.stat-value');
+        const observerCounter = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = parseInt(entry.target.getAttribute('data-count'));
+                    let current = 0;
+                    const increment = target / 40;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            entry.target.textContent = target + '+';
+                            clearInterval(timer);
+                        } else {
+                            entry.target.textContent = Math.floor(current) + '+';
+                        }
+                    }, 40);
+                    observerCounter.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        stats.forEach(stat => observerCounter.observe(stat));
+
+        // ============================================
+        // BUS ROUTE — SCROLL TRACKING (CURVY PATH)
+        // ============================================
+        const busVehicle = document.getElementById('busVehicle');
+        const routePathProgress = document.getElementById('routePathProgress');
+        const routePathBg = document.getElementById('routePathBg');
+        const busStops = document.querySelectorAll('.bus-stop');
+        const busRouteEl = document.getElementById('busRoute');
+
+        // Get path length and set CSS variable
+        const pathLength = routePathBg.getTotalLength();
+        routePathProgress.style.setProperty('--path-length', pathLength);
+        routePathProgress.style.strokeDasharray = pathLength;
+        routePathProgress.style.strokeDashoffset = pathLength;
+
+        // Position bus stops on the curve
+        function positionStops() {
+            const svg = routePathBg.ownerSVGElement;
+            const routeRect = busRouteEl.getBoundingClientRect();
+            busStops.forEach(stop => {
+                const t = parseFloat(stop.dataset.stop);
+                const point = routePathBg.getPointAtLength(t * pathLength);
+                // Convert SVG coords to percentage of container
+                const xPct = (point.x / 100) * 100;
+                const yPct = (point.y / 1000) * 100;
+                stop.style.left = xPct + '%';
+                stop.style.top = yPct + '%';
+            });
+        }
+        positionStops();
+        window.addEventListener('resize', positionStops);
+
+        function updateBus() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = Math.min(scrollTop / docHeight, 1);
+
+            // Bus travels only between first stop (0.08) and last stop (0.92)
+            const firstStop = 0.08;
+            const lastStop = 0.92;
+            const busT = firstStop + scrollPercent * (lastStop - firstStop);
+
+            // Update curvy progress line
+            const drawLength = pathLength * (1 - busT);
+            routePathProgress.style.strokeDashoffset = drawLength;
+
+            // Get position on curve for bus
+            const busPoint = routePathBg.getPointAtLength(busT * pathLength);
+            // Convert SVG viewBox coords to screen coords
+            const routeRect = busRouteEl.getBoundingClientRect();
+            const scaleX = routeRect.width / 100;
+            const scaleY = routeRect.height / 1000;
+            const busX = routeRect.left + busPoint.x * scaleX;
+            const busY = routeRect.top + busPoint.y * scaleY;
+
+            // Get tangent angle for bus rotation
+            const delta = 2;
+            const p1 = routePathBg.getPointAtLength(Math.max(0, busT * pathLength - delta));
+            const p2 = routePathBg.getPointAtLength(Math.min(pathLength, busT * pathLength + delta));
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI) - 90;
+
+            busVehicle.style.left = busX - 22 + 'px';
+            busVehicle.style.top = busY - 35 + 'px';
+            busVehicle.style.transform = `rotate(${angle}deg)`;
+
+            // Update bus stops
+            busStops.forEach(stop => {
+                const stopT = parseFloat(stop.dataset.stop);
+                if (busT >= stopT - 0.03) {
+                    stop.classList.add('visited');
+                } else {
+                    stop.classList.remove('visited');
+                }
+            });
+
+            requestAnimationFrame(updateBus);
+        }
+        requestAnimationFrame(updateBus);
+
+        // ============================================
+        // SMOOTH SCROLL FOR NAV LINKS
+        // ============================================
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // ============================================
+        // SKILL CARDS STAGGER ANIMATION
+        // ============================================
+        const staggerEls = document.querySelectorAll('[class*="stagger-"]');
+        const observerStagger = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        staggerEls.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = `all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${el.className.match(/stagger-(\d)/)?.[1] * 0.12}s`;
+            observerStagger.observe(el);
+        });
+
+    </script>
+</body>
+</html>
